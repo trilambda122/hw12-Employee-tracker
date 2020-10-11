@@ -19,8 +19,8 @@ INSERT INTO role (title,salary,department_id,id) VALUES ("software tech 1",50000
 ,("construction manager",80000.00,4,402)
 ,("hr generalist",60000.00,5,501)
 ,("hr manager",100000.00,5,502)
-,("ceo",200000.00,5,601)
-,("cfo",250000.00,5,602);
+,("ceo",200000.00,6,601)
+,("cfo",250000.00,6,602);
 
 INSERT INTO employee (first_name,last_name,role_id) VALUES
 ("Isabel","Archer",102)
