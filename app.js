@@ -140,24 +140,66 @@ function onMainPromptAnswer({ action }) {
     }
 
     function updateEmployeeRole() {
-        const query = `Select concat(UPPER(first_name)," " ,UPPER(last_name)) as name from employee;`
+        const employeeListSQL = `Select concat(UPPER(first_name)," " ,UPPER(last_name)) as name from employee;`
+
         let employees = [];
 
-        connection.query(query, (error, response) => {
-            if (error) throw error;
 
+        connection.query(employeeListSQL, (error, response) => {
+            if (error) throw error;
             response.forEach(item => {
                 employees.push(item.name);
             });
+            // const rolesListSQL = `Select title from role;`
+            // let roles = [];
+            // connection.query(rolesListSQL, (error, response) => {
+            //     if (error) throw error;
+            //     let roleList = [];
+            //     response.forEach(item => {
+            //         roleList = roles.push(item);
+            //     })
+
+            // })
             inquirer.prompt(
                 [{
-                    name: 'employee',
-                    type: 'rawlist',
-                    message: 'Please select: ',
-                    choices: employees
-                }]
+                        name: 'employee',
+                        type: 'rawlist',
+                        message: 'Please select employee: ',
+                        choices: employees
+                    },
+                    {
+                        name: 'roles',
+                        type: "rawlist",
+                        message: 'Please select new role',
+                        choices: ['software tech 1',
+                            'software tech 2',
+                            'senior dev',
+                            'field tech 1',
+                            'field tech 2',
+                            'accountant',
+                            'controller',
+                            'construction coordinator',
+                            'construction manager',
+                            'hr generalist',
+                            'hr manager',
+                            'ceo',
+                            'cfo'
+                        ]
+
+                    }
+                ]
+
             ).then(answers => {
                 console.log(answers);
+                const query = `INSERT INTO department (name, id) VALUES (?,?)`
+                connection.query(query, [answers.department_name, answers.department_number], (error, response) => {
+                    if (error) throw error;
+                    console.table(response);
+                    mainPrompt();
+                });
+
+
+                mainPrompt();
 
             });
 
