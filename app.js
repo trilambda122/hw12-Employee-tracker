@@ -150,16 +150,6 @@ function onMainPromptAnswer({ action }) {
             response.forEach(item => {
                 employees.push(item.name);
             });
-            // const rolesListSQL = `Select title from role;`
-            // let roles = [];
-            // connection.query(rolesListSQL, (error, response) => {
-            //     if (error) throw error;
-            //     let roleList = [];
-            //     response.forEach(item => {
-            //         roleList = roles.push(item);
-            //     })
-
-            // })
             inquirer.prompt(
                 [{
                         name: 'employee',
@@ -190,25 +180,41 @@ function onMainPromptAnswer({ action }) {
                 ]
 
             ).then(answers => {
-                console.log(answers);
-                const query = `INSERT INTO department (name, id) VALUES (?,?)`
-                connection.query(query, [answers.department_name, answers.department_number], (error, response) => {
+                // console.log(answers);
+                let employeeId;
+                let roleId;
+                // get employee id from selection 
+                const getEmployeeIdSQL = `Select id from employee  where concat(UPPER(first_name)," " ,UPPER(last_name))=?;`
+                connection.query(getEmployeeIdSQL, [answers.employee], (error, response) => {
                     if (error) throw error;
-                    console.table(response);
-                    mainPrompt();
+
+                    // get role id from selection
+                    const getRoleIdSQL = `select id from role where title=?;`
+                    employeeId = response[0].id;
+
+                    connection.query(getRoleIdSQL, [answers.roles], (error, response) => {
+                        if (error) throw error;
+                        roleId = response[0].id;
+
+                        console.log('----------');
+                        console.log("employee id: " + employeeId);
+                        console.log("role id: " + roleId);
+
+                        const updateEmployeeRoleSQL = `update employee set role_id=? where employee.id=?;`
+                        connection.query(updateEmployeeRoleSQL, [roleId, employeeId], (error, response) => {
+                            if (error) throw error;
+                            console.log(response);
+                            mainPrompt();
+                        })
+                    })
+
+
+
                 });
 
 
-                mainPrompt();
 
             });
-
-
-
-
-
-
-
 
         });
 
