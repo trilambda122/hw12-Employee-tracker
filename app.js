@@ -11,6 +11,7 @@ const connection = mysql.createConnection({
     database: "employee_tracking_DB"
 });
 
+
 // Connect to the MySQL server, and call `mainPrompt()` when connected
 connection.connect(err => {
     if (err) {
@@ -139,38 +140,39 @@ function onMainPromptAnswer({ action }) {
     }
 
     function updateEmployeeRole() {
-        const query = 'Select UPPER(title) from role;'
-        const roles = [];
+        const query = `Select concat(UPPER(first_name)," " ,UPPER(last_name)) as name from employee;`
+        let employees = [];
+
         connection.query(query, (error, response) => {
             if (error) throw error;
-            console.log(response);
-            // roles = roles.push(response);
-            // console.log(roles);
-        });
 
-
-
-        inquirer.prompt([{
-                name: "employee",
-                type: "list",
-                message: "Pick an employee",
-                choices: ["stuff1", "stuff2"]
-            },
-
-        ]).then(answers => {
-            console.log(answers)
-
-            const query = `INSERT INTO department (name, id) VALUES (?,?)`
-            connection.query(query, [answers.department_name, answers.department_number], (error, response) => {
-                if (error) throw error;
-                console.table(response);
-                mainPrompt();
+            response.forEach(item => {
+                employees.push(item.name);
             });
+            inquirer.prompt(
+                [{
+                    name: 'employee',
+                    type: 'rawlist',
+                    message: 'Please select: ',
+                    choices: employees
+                }]
+            ).then(answers => {
+                console.log(answers);
+
+            });
+
+
+
+
+
+
+
 
         });
 
 
     }
+
 
 
 
