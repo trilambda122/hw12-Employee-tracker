@@ -91,7 +91,7 @@ function onMainPromptAnswer({ action }) {
     }
 
     function viewEmployees() {
-        const query = `select first_name,last_name,UPPER(title) as Position_title, UPPER(name) as Department_name from employee
+        const query = `select employee.id, first_name,last_name,UPPER(title) as Position_title, UPPER(name) as Department_name from employee
         inner join role on employee.role_id = role.id 
         inner join employee_tracking_DB.department on department.id = role.department_id;`
         connection.query(query, (error, response) => {
@@ -139,87 +139,194 @@ function onMainPromptAnswer({ action }) {
 
     }
 
-    function updateEmployeeRole() {
-        const employeeListSQL = `Select concat(UPPER(first_name)," " ,UPPER(last_name)) as name from employee;`
+    function addRole() {
+        inquirer.prompt([{
+                name: "role_title",
+                type: "input",
+                message: "Please enter the role title"
+            },
+            {
+                name: "role_salary",
+                type: 'input',
+                message: 'whats the starting salary for the role'
 
-        let employees = [];
+            },
+            {
+                name: "department_id",
+                type: 'input',
+                message: 'what department id does this belong to'
 
+            },
+            {
+                name: "role_number",
+                type: 'input',
+                message: 'enter role number'
 
-        connection.query(employeeListSQL, (error, response) => {
-            if (error) throw error;
-            response.forEach(item => {
-                employees.push(item.name);
+            }
+
+        ]).then(answers => {
+            console.log(answers)
+
+            const query = `INSERT INTO role (title,salary,id,department_id) VALUES (?,?,?,?)`
+            connection.query(query, [answers.role_title, answers.role_salary, answers.role_number, answers.department_id], (error, response) => {
+                if (error) throw error;
+                console.table(response);
+                mainPrompt();
             });
-            inquirer.prompt(
-                [{
-                        name: 'employee',
-                        type: 'rawlist',
-                        message: 'Please select employee: ',
-                        choices: employees
-                    },
-                    {
-                        name: 'roles',
-                        type: "rawlist",
-                        message: 'Please select new role',
-                        choices: ['software tech 1',
-                            'software tech 2',
-                            'senior dev',
-                            'field tech 1',
-                            'field tech 2',
-                            'accountant',
-                            'controller',
-                            'construction coordinator',
-                            'construction manager',
-                            'hr generalist',
-                            'hr manager',
-                            'ceo',
-                            'cfo'
-                        ]
 
-                    }
-                ]
-
-            ).then(answers => {
-                // console.log(answers);
-                let employeeId;
-                let roleId;
-                // get employee id from selection 
-                const getEmployeeIdSQL = `Select id from employee  where concat(UPPER(first_name)," " ,UPPER(last_name))=?;`
-                connection.query(getEmployeeIdSQL, [answers.employee], (error, response) => {
-                    if (error) throw error;
-
-                    // get role id from selection
-                    const getRoleIdSQL = `select id from role where title=?;`
-                    employeeId = response[0].id;
-
-                    connection.query(getRoleIdSQL, [answers.roles], (error, response) => {
-                        if (error) throw error;
-                        roleId = response[0].id;
-
-                        console.log('----------');
-                        console.log("employee id: " + employeeId);
-                        console.log("role id: " + roleId);
-
-                        const updateEmployeeRoleSQL = `update employee set role_id=? where employee.id=?;`
-                        connection.query(updateEmployeeRoleSQL, [roleId, employeeId], (error, response) => {
-                            if (error) throw error;
-                            console.log(response);
-                            mainPrompt();
-                        })
-                    })
+        });
+    }
 
 
+    function addEmployee() {
+        inquirer.prompt([{
+                name: "employee_first_name",
+                type: "input",
+                message: "Please enter the employees first name"
+            },
+            {
+                name: "employee_last_name",
+                type: 'input',
+                message: 'please enter the employees last name'
 
-                });
+            },
+            {
+                name: "employee_role",
+                type: 'input',
+                message: 'Please enter the ID for the employees role'
 
+            },
+            {
+                name: "manager_id",
+                type: 'input',
+                message: 'if employee has a managers please enter managers empployee id number'
 
+            }
 
+        ]).then(answers => {
+            console.log(answers)
+
+            const query = `INSERT INTO employee (first_name,last_name,role_id,manager_id) VALUES (?,?,?,?)`
+            connection.query(query, [answers.employee_first_name, answers.employee_last_name, answers.employee_role, answers.manager_id], (error, response) => {
+                if (error) throw error;
+                console.table(response);
+                mainPrompt();
             });
 
         });
 
 
     }
+
+    function updateEmployeeRole() {
+        console.log("");
+        inquirer.prompt([{
+                name: "employee_id",
+                type: "input",
+                message: "Please enter ID number for employee to update"
+            },
+            {
+                name: "role_id",
+                type: 'input',
+                message: 'please enter the ID of the role you would like to assign the the employee '
+
+            }
+
+        ]).then(answers => {
+            console.log(answers)
+
+            const query = `UPDATE employee SET role_id=?  WHERE employee.id=?;`
+            connection.query(query, [answers.role_id, answers.employee_id], (error, response) => {
+                if (error) throw error;
+                console.table(response);
+                mainPrompt();
+            });
+
+        });
+    }
+    // function updateEmployeeRole() {
+    //     const employeeListSQL = `Select concat(UPPER(first_name)," " ,UPPER(last_name)) as name from employee;`
+
+    //     let employees = [];
+
+
+    //     connection.query(employeeListSQL, (error, response) => {
+    //         if (error) throw error;
+    //         response.forEach(item => {
+    //             employees.push(item.name);
+
+
+    //         });
+    //         inquirer.prompt(
+    //             [{
+    //                     name: 'employee',
+    //                     type: 'rawlist',
+    //                     message: 'Please select employee: ',
+    //                     choices: employees
+    //                 },
+    //                 {
+    //                     name: 'roles',
+    //                     type: "rawlist",
+    //                     message: 'Please select new role',
+    //                     choices: ['software tech 1',
+    //                         'software tech 2',
+    //                         'senior dev',
+    //                         'field tech 1',
+    //                         'field tech 2',
+    //                         'accountant',
+    //                         'controller',
+    //                         'construction coordinator',
+    //                         'construction manager',
+    //                         'hr generalist',
+    //                         'hr manager',
+    //                         'ceo',
+    //                         'cfo'
+    //                     ]
+
+    //                 }
+    //             ]
+
+    //         ).then(answers => {
+    //             // console.log(answers);
+    //             let employeeId;
+    //             let roleId;
+    //             // get employee id from selection 
+    //             const getEmployeeIdSQL = `Select id from employee  where concat(UPPER(first_name)," " ,UPPER(last_name))=?;`
+    //             connection.query(getEmployeeIdSQL, [answers.employee], (error, response) => {
+    //                 if (error) throw error;
+
+    //                 // get role id from selection
+    //                 const getRoleIdSQL = `select id from role where title=?;`
+    //                 employeeId = response[0].id;
+
+    //                 connection.query(getRoleIdSQL, [answers.roles], (error, response) => {
+    //                     if (error) throw error;
+    //                     roleId = response[0].id;
+
+    //                     console.log('----------');
+    //                     console.log("employee id: " + employeeId);
+    //                     console.log("role id: " + roleId);
+
+    //                     const updateEmployeeRoleSQL = `update employee set role_id=? where employee.id=?;`
+    //                     connection.query(updateEmployeeRoleSQL, [roleId, employeeId], (error, response) => {
+    //                         if (error) throw error;
+    //                         console.log(response);
+    //                         mainPrompt();
+    //                     })
+    //                 })
+
+
+
+    //             });
+
+
+
+    //         });
+
+    //     });
+
+
+    // }
 
 
 
