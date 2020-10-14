@@ -2,6 +2,9 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 require('console.table');
+const chalk = require('chalk');
+const figlet = require('figlet');
+
 // Create/configure our MySQL connection
 const connection = mysql.createConnection({
     host: "localhost",
@@ -22,6 +25,7 @@ connection.connect(err => {
 
 // main entry point of the program once the database connection is estalbished 
 function mainPrompt() {
+    console.log(chalk.yellow(figlet.textSync('EMPLOYEE TRACKING', { horizontalLayout: 'default', width: 80, whitespaceBreak: true })));
     inquirer.prompt({
         name: "action",
         type: "list",
