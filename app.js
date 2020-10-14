@@ -244,6 +244,12 @@ function onMainPromptAnswer({ action }) {
 
         });
     }
+
+
+
+
+    // would like to rewrite functions to be more dynamic. ie having the choices dynaimcly populated by SQL queries 
+
     // function updateEmployeeRole() {
     //     const employeeListSQL = `Select concat(UPPER(first_name)," " ,UPPER(last_name)) as name from employee;`
 
